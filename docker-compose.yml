@@ -1,0 +1,94 @@
+version: "3"
+
+services:
+  webserver:
+    container_name: webserver
+    image: nginx:1.17-alpine
+    restart: unless-stopped
+    volumes:
+      - ./backend:/backend
+      - ./frontend:/frontend
+      - ./docker/webserver:/etc/nginx/conf.d
+    ports:
+      - 8000:80
+    depends_on:
+      - backend
+      - frontend
+
+  backend:
+    container_name: backend
+    build: ./backend
+    restart: unless-stopped
+    volumes:
+      - ./backend:/backend
+    working_dir: /backend
+    environment:
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    depends_on:
+      - postgres
+      - redis
+
+  frontend:
+    container_name: frontend
+    build: ./frontend
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/frontend
+    working_dir: /frontend
+    environment:
+      - API_URL=http://localhost:8000/api/
+    ports:
+      - 8080:8080
+    depends_on:
+      - backend
+
+  postgres:
+    container_name: postgres
+    image: postgres:12-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+
+  redis:
+    image: bitnami/redis:5.0
+    container_name: redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+
+  background:
+    build: docker/background
+    container_name: background
+    restart: unless-stopped
+    volumes:
+      - ./backend:/backend
+    environment:
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    depends_on:
+      - postgres
+      - redis
+
+  echo-server:
+    build: docker/echo-server
+    container_name: echo-server
+    volumes:
+      - ./backend:/backend
+      - ./docker/echo-server/config.json:/backend/laravel-echo-server.json
+    restart: unless-stopped
+    working_dir: /backend
+    ports:
+      - 6001:6001
+    environment:
+      - LARAVEL_ECHO_SERVER_REDIS_PASSWORD=${REDIS_PASSWORD}
+    depends_on:
+      - redis
+
+networks:
+  default:
