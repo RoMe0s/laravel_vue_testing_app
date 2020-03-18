@@ -12,7 +12,7 @@ export default {
       throw e;
     }
   },
-  async register({}, {email, name, password, password_confirmation}) {
+  async register(_context, {email, name, password, password_confirmation}) {
     await Http.post('/register', {email, name, password, password_confirmation});
   },
   logout({commit}) {

@@ -28,7 +28,7 @@ export default {
     await Http.delete(`/monitors/${monitor.id}`);
     dispatch('fetchMonitors', 1);
   },
-  async manualCheck({}, {checkUptime, checkCertificates}) {
+  async manualCheck(_context, {checkUptime, checkCertificates}) {
     await Http.post('/monitors/check', {
       check_uptime: checkUptime,
       check_certificates: checkCertificates
