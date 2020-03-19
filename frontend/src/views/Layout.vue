@@ -72,9 +72,9 @@
       ...mapActions({
         logout: 'user/logout',
       }),
-      handleLogout() {
-        this.logout();
-        this.$router.push({name: 'login'});
+      async handleLogout() {
+        await this.logout();
+        await this.$router.push({name: 'login'});
       }
     }
   }

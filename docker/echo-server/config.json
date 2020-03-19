@@ -1,6 +1,6 @@
 {
   "authHost": "http://webserver",
-  "authEndpoint": "/api/broadcasting/auth",
+  "authEndpoint": "/broadcasting/auth",
   "clients": [],
   "database": "redis",
   "databaseConfig": {

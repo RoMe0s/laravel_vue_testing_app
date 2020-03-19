@@ -5,25 +5,30 @@ namespace App\Http\Controllers\Api;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Services\User\UserService;
-use App\Services\User\WrongCredentialsException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends ApiController
 {
     public function login(LoginRequest $request, UserService $userService): JsonResponse
     {
-        try {
-            $authenticatedUser = $userService->authenticate($request->getDTO());
-        } catch (WrongCredentialsException $exception) {
+        $authenticatedUser = $userService->authenticate($request->getDTO());
+
+        if (is_null($authenticatedUser)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
-        } catch (\Throwable $throwable) {
-            throw $throwable;
         }
 
-        return new JsonResponse(['token' => $authenticatedUser->token]);
+        Auth::login($authenticatedUser);
+        return new JsonResponse();
+    }
+
+    public function logout(): JsonResponse
+    {
+        Auth::logout();
+        return new JsonResponse();
     }
 
     public function register(RegisterRequest $request, UserService $userService): JsonResponse

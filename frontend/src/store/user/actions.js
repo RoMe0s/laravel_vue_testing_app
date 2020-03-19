@@ -1,23 +1,21 @@
 import {Http} from '@/lib/http';
 
 export default {
-  async authorize({dispatch, commit}, {email, password, remember}) {
+  async authorize({commit, dispatch}, {email, password, remember}) {
     try {
-      const {data} = await Http.post('/login', {email, password});
-
-      commit('setToken', data.token, remember);
+      await Http.post('/login', {email, password, remember});
       await dispatch('fetchUser');
     } catch (e) {
-      commit('removeToken');
+      commit('setUser', null);
       throw e;
     }
   },
   async register(_context, {email, name, password, password_confirmation}) {
     await Http.post('/register', {email, name, password, password_confirmation});
   },
-  logout({commit}) {
+  async logout({commit}) {
+    await Http.post('/logout');
     commit('setUser', null);
-    commit('removeToken');
   },
 
   async fetchUser({commit}) {
@@ -30,10 +28,7 @@ export default {
     }
   },
   async fetchUserOnce({dispatch, getters}) {
-    if (
-      typeof getters.getToken === typeof ''
-      && getters.getUser === undefined
-    ) {
+    if (getters.getUser === undefined) {
       await dispatch('fetchUser');
     }
   }

@@ -16,8 +16,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('login', 'AuthController@login');
 Route::post('register', 'AuthController@register');
+Route::post('logout', 'AuthController@logout');
 
-Route::middleware('auth:airlock')->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('user', 'UserController@me');
 
     Route::apiResource('monitors', 'MonitorController')->only(['index', 'store', 'destroy']);

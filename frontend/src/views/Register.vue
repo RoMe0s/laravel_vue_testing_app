@@ -137,7 +137,12 @@
           });
         } catch (e) {
           Object.values(e.response.data.errors).flat().forEach(toastr.error);
+          return;
         }
+
+        toastr.success('Registration was successful!');
+
+        await this.$router.push({name: 'login'});
       }
     }
   }
