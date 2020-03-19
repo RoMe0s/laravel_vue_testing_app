@@ -14,11 +14,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('login', 'AuthController@login');
-Route::post('register', 'AuthController@register');
-Route::post('logout', 'AuthController@logout');
+Route::middleware('guest')->group(function () {
+    Route::post('login', 'AuthController@login');
+    Route::post('register', 'AuthController@register');
+});
 
 Route::middleware('auth')->group(function () {
+    Route::post('logout', 'AuthController@logout');
+
     Route::get('user', 'UserController@me');
 
     Route::apiResource('monitors', 'MonitorController')->only(['index', 'store', 'destroy']);
